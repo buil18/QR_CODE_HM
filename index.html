@@ -1,0 +1,1755 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B5A2C">
+<title>KHO HOC MON</title>
+<style>
+:root{
+  --green:#0B5A2C;
+  --green-deep:#06381B;
+  --green-soft:#E3EDE5;
+  --ink:#14181A;
+  --paper:#EFF2EE;
+  --card:#FFFFFF;
+  --line:#D3DBD4;
+  --muted:#5E6C64;
+  --amber:#E4A017;
+  --radius:14px;
+  --tap:64px;
+  --mono:ui-monospace,"SF Mono","Roboto Mono","DejaVu Sans Mono",Menlo,Consolas,monospace;
+  --ui:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);font-family:var(--ui);
+  -webkit-text-size-adjust:100%;overflow:hidden;
+  -webkit-tap-highlight-color:transparent;
+}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+
+/* ---------- header ---------- */
+.top{
+  display:flex;align-items:center;gap:16px;
+  padding:12px 18px;background:var(--green);color:#fff;
+  padding-top:max(12px,env(safe-area-inset-top));
+}
+.mark{
+  width:38px;height:38px;border-radius:9px;background:#fff;flex:none;
+  display:grid;place-items:center;color:var(--green);font-weight:800;font-size:15px;
+  font-family:var(--mono);letter-spacing:-.5px;
+}
+.top h1{margin:0;font-size:17px;font-weight:650;letter-spacing:.2px}
+.top .sub{font-size:12.5px;opacity:.78;margin-top:2px}
+.top .spacer{flex:1}
+.tbtn{
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);
+  color:#fff;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;
+  min-height:44px;
+}
+.tbtn:hover{background:rgba(255,255,255,.2)}
+
+/* ---------- layout ---------- */
+.wrap{display:flex;height:calc(100% - 62px);min-height:0}
+.rail{
+  width:210px;flex:none;background:#fff;border-right:1px solid var(--line);
+  display:flex;flex-direction:column;min-height:0;
+}
+.rail-head{padding:14px 14px 8px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.rail-list{overflow-y:auto;padding:0 10px 14px;-webkit-overflow-scrolling:touch}
+.wh{
+  display:block;width:100%;text-align:left;background:transparent;border:1px solid transparent;
+  border-radius:11px;padding:14px 14px;margin-bottom:4px;font-size:16px;font-weight:600;min-height:56px;
+}
+.wh small{display:block;font-weight:500;color:var(--muted);font-size:12.5px;margin-top:3px}
+.wh:hover{background:var(--green-soft)}
+.wh[aria-current="true"]{background:var(--green);color:#fff}
+.wh[aria-current="true"] small{color:rgba(255,255,255,.8)}
+
+.board{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0}
+.board-head{
+  display:flex;gap:12px;align-items:center;padding:14px 18px;
+  border-bottom:1px solid var(--line);background:var(--paper);
+}
+.search{
+  flex:1;display:flex;align-items:center;gap:10px;background:#fff;
+  border:1px solid var(--line);border-radius:12px;padding:0 14px;min-height:52px;
+}
+.search input{
+  border:0;outline:0;background:transparent;flex:1;font-size:17px;font-family:var(--mono);
+  letter-spacing:.5px;min-width:0;
+}
+.search input::placeholder{font-family:var(--ui);letter-spacing:0;color:#9AA6A0}
+.search .x{border:0;background:transparent;color:var(--muted);font-size:20px;padding:6px 2px;line-height:1}
+.count{font-size:13px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+
+.grid{
+  flex:1;overflow-y:auto;padding:16px 18px 28px;
+  display:grid;gap:10px;align-content:start;
+  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  -webkit-overflow-scrolling:touch;
+}
+.loc{
+  background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+  min-height:var(--tap);padding:12px;font-family:var(--mono);font-size:21px;font-weight:700;
+  letter-spacing:.5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  transition:transform .06s ease, background .12s ease;
+}
+.loc .whtag{
+  font-family:var(--ui);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--green);background:var(--green-soft);border-radius:999px;padding:2px 8px;
+}
+.grid-note{
+  grid-column:1/-1;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  font-weight:700;padding:10px 2px 0;
+}
+.loc:hover{background:var(--green-soft);border-color:#B9CCBE}
+.loc:active{transform:scale(.97)}
+.empty{padding:60px 20px;text-align:center;color:var(--muted);grid-column:1/-1}
+.empty b{display:block;font-size:17px;color:var(--ink);margin-bottom:6px}
+
+/* ---------- sticker ---------- */
+.sticker{
+  background:var(--green);border-radius:20px;padding:10px 10px 0;
+  display:flex;flex-direction:column;width:100%;aspect-ratio:2/3;
+  box-shadow:0 10px 30px rgba(6,56,27,.22);
+}
+.sticker .panel{background:#fff;border-radius:12px;padding:6%;flex:1;display:grid;place-items:center;min-height:0}
+.sticker .panel svg{width:100%;height:100%;display:block}
+.sticker .panel canvas{width:100%;height:auto;display:block;image-rendering:pixelated;image-rendering:crisp-edges}
+.sticker .band{
+  flex:0 0 30%;display:grid;place-items:center;color:#fff;
+  font-family:var(--ui);font-weight:800;letter-spacing:-.5px;
+  font-size:clamp(28px,9cqw,74px);
+}
+
+/* ---------- label overlay ---------- */
+.sheet{
+  position:fixed;inset:0;background:rgba(9,26,16,.55);backdrop-filter:blur(3px);
+  display:none;z-index:40;padding:18px;
+}
+.sheet.on{display:flex;align-items:center;justify-content:center}
+.sheet-card{
+  background:var(--paper);border-radius:22px;width:min(1000px,100%);max-height:100%;
+  display:flex;overflow:hidden;box-shadow:0 30px 70px rgba(0,0,0,.35);
+}
+.sheet-left{
+  flex:0 0 46%;padding:22px;display:grid;place-items:center;background:var(--green-soft);
+  container-type:inline-size;
+}
+.sheet-left .sticker{width:min(100%,340px)}
+@media (max-height:720px){.sheet-left .sticker{width:min(100%,250px)}}
+.sheet-right{flex:1;padding:26px 26px 22px;display:flex;flex-direction:column;min-width:0}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.big-code{
+  font-family:var(--mono);font-weight:700;font-size:clamp(38px,7vw,62px);
+  letter-spacing:-1px;margin:6px 0 2px;word-break:break-all;line-height:1.05;
+}
+.payload{
+  margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;
+}
+.payload .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.payload .v{font-family:var(--mono);font-size:16px;margin-top:5px;word-break:break-all}
+.sheet-actions{margin-top:auto;display:flex;gap:10px;flex-wrap:wrap;padding-top:18px}
+.btn{
+  border:1px solid var(--line);background:#fff;border-radius:12px;padding:0 18px;
+  min-height:54px;font-size:15px;font-weight:650;display:inline-flex;align-items:center;gap:8px;
+}
+.btn:hover{background:var(--green-soft)}
+.btn.primary{background:var(--green);border-color:var(--green);color:#fff}
+.btn.primary:hover{background:var(--green-deep)}
+.btn.ghost{background:transparent}
+.btn[disabled]{opacity:.4;pointer-events:none}
+.nav-pair{display:flex;gap:8px;margin-left:auto}
+
+/* ---------- modal ---------- */
+.modal{position:fixed;inset:0;background:rgba(9,26,16,.55);display:none;z-index:50;padding:18px}
+.modal.on{display:flex;align-items:center;justify-content:center}
+.modal-card{
+  background:var(--paper);border-radius:20px;width:min(760px,100%);max-height:100%;
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.modal-head{display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid var(--line);background:#fff}
+.modal-head h2{margin:0;font-size:18px}
+.tabs{display:flex;gap:6px;padding:12px 18px 0;background:#fff}
+.tab{border:0;background:transparent;padding:10px 14px;border-radius:10px 10px 0 0;font-weight:650;font-size:14.5px;color:var(--muted)}
+.tab[aria-selected="true"]{background:var(--paper);color:var(--ink)}
+.modal-body{padding:20px 22px;overflow-y:auto;flex:1}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+.field .hint{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.5}
+input[type=text],select,textarea{
+  width:100%;border:1px solid var(--line);border-radius:11px;padding:13px 14px;
+  font-size:16px;font-family:var(--mono);background:#fff;color:var(--ink);
+}
+textarea{min-height:220px;line-height:1.6;resize:vertical}
+select{font-family:var(--ui)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.row>*{flex:1;min-width:150px}
+.row .narrow{flex:0 0 auto;min-width:0}
+.note{
+  background:#FFF7E6;border:1px solid #F0D79B;border-radius:12px;padding:14px 16px;
+  font-size:13.5px;line-height:1.6;margin-bottom:18px;
+}
+.note b{display:block;margin-bottom:4px}
+.danger{color:#9B2222;border-color:#E6C3C3;background:#fff}
+.preview{display:flex;gap:16px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
+.preview .mini{width:104px;flex:none;container-type:inline-size}
+.warn{color:#9B2222;font-size:12.5px;margin-top:8px;font-weight:600}
+.sub-label{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;display:block}
+.gen{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+/* ---------- scan mode ---------- */
+.scanview{position:fixed;inset:0;background:#fff;z-index:60;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:16px}
+.scanview.on{display:flex}
+.scanview canvas{width:min(88vw,72vh);height:auto;image-rendering:pixelated;image-rendering:crisp-edges}
+.scanview .scode{font-family:var(--mono);font-size:clamp(20px,4vw,32px);font-weight:700;letter-spacing:1px}
+.scanview .shint{font-size:13px;color:var(--muted);text-align:center;max-width:520px;line-height:1.5}
+.scanview .exit{position:absolute;top:14px;right:14px}
+.scanview .skip{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:96vw}
+.scanview .btn{min-height:46px;padding:0 14px;font-size:14px}
+.scanview.inv{background:#000;color:#fff}
+.scanview.inv .shint{color:#9AA6A0}
+.scanview.inv .btn{background:#1b1f1d;border-color:#333;color:#fff}
+
+.sizetest{position:fixed;inset:0;background:#fff;z-index:66;display:none;overflow-y:auto;padding:20px 16px 40px;-webkit-overflow-scrolling:touch}
+.sizetest.on{display:block}
+.sizetest h2{margin:0 0 4px;font-size:19px;text-align:center}
+.sizetest .lead{text-align:center;font-size:13.5px;color:var(--muted);max-width:560px;margin:0 auto 22px;line-height:1.55}
+.st-row{display:flex;flex-direction:column;align-items:center;gap:10px;padding:22px 0;border-top:1px solid var(--line)}
+.st-row .tag{font-size:15px;font-weight:700}
+.st-row .meta{font-size:12.5px;color:var(--muted);font-family:var(--mono)}
+.sizetest .exit{position:sticky;top:0;float:right;z-index:2}
+
+.compare{position:fixed;inset:0;background:#fff;z-index:65;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px}
+.compare.on{display:flex}
+.compare img{max-width:90vw;max-height:74vh;object-fit:contain}
+.compare .cap{font-size:13px;color:var(--muted);text-align:center;max-width:520px;line-height:1.5}
+.compare .exit{position:absolute;top:14px;right:14px}
+
+/* ---------- ask dialog ---------- */
+.ask{position:fixed;inset:0;background:rgba(9,26,16,.6);display:none;z-index:70;align-items:center;justify-content:center;padding:20px}
+.ask.on{display:flex}
+.ask-card{background:#fff;border-radius:16px;padding:22px;width:min(430px,100%);box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.ask-card h3{margin:0 0 6px;font-size:17px}
+.ask-card p{margin:0 0 14px;font-size:14px;color:var(--muted);line-height:1.5}
+.ask-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+
+.banner{
+  background:#FFF3D6;border-bottom:1px solid #EBCF92;padding:10px 18px;font-size:13.5px;
+  display:none;align-items:center;gap:10px;line-height:1.45;
+}
+.banner.on{display:flex}
+.banner b{font-weight:700}
+.toast{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:26px;z-index:80;
+  background:var(--ink);color:#fff;padding:13px 20px;border-radius:12px;font-size:14.5px;
+  opacity:0;pointer-events:none;transition:opacity .18s ease;
+}
+.toast.on{opacity:1}
+
+/* ---------- print ---------- */
+#printRoot{display:none}
+@media print{
+  body{overflow:visible;background:#fff}
+  .top,.wrap,.sheet,.modal,.toast,.scanview,.compare,.sizetest,.ask,.banner,.printdlg{display:none !important}
+  #printRoot{display:block}
+  .p-page{break-after:page;page-break-after:always;display:grid;gap:8mm;
+    height:calc(100vh - 2mm);overflow:hidden;box-sizing:border-box}
+  .p-page:last-child{break-after:auto;page-break-after:auto}
+  .p-page.blank{display:block}
+  .p-page.c2{grid-template-columns:repeat(2,1fr)}
+  .p-page.c3{grid-template-columns:repeat(3,1fr)}
+  .p-cell{container-type:inline-size;break-inside:avoid;page-break-inside:avoid;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4mm}
+  .p-cell.plain .p-qr{width:min(86%,105mm)}
+  .p-cell.plain .p-qr svg{width:100%;height:auto;display:block}
+  .p-cell.plain .p-code{font-weight:800;font-size:min(13cqw,34pt);letter-spacing:.5px;color:#000}
+  .p-cell.tem{padding:0 4%}
+  .p-cell.tem .sticker{width:100%}
+  .p-one{width:70mm;margin:0 auto;container-type:inline-size}
+  .sticker{box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  @page{size:A4;margin:8mm}
+}
+
+@media (max-width:820px){
+  .wrap{flex-direction:column}
+  .rail{width:100%;border-right:0;border-bottom:1px solid var(--line);flex:none}
+  .rail-list{display:flex;gap:8px;overflow-x:auto;padding:0 12px 12px}
+  .rail-head{padding-bottom:6px}
+  .wh{width:auto;white-space:nowrap;border:1px solid var(--line)}
+  .sheet-card{flex-direction:column;overflow-y:auto}
+  .sheet-left{flex:none;padding:16px}
+  .sheet-left .sticker{width:min(100%,320px);margin:0 auto}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+</style>
+</head>
+<body>
+<script id="seedData" type="application/json">
+{"version":2,"warehouses":[{"id":"kho-g-sv53","name":"Kho G","codes":["HMG09","HMG11","HMG13","HMG15","HMG17","HMG19","HMG21","HMG23","HMG25","HMG27","HMG29","HMG31","HMG33","HMG35","HMG37","HMG39","HMG41","HMG43","HMG45","HMG47","HMG49","HMG51","HMG53","HMG55","HMG57","HMG57.2","HMG57.1","HMG59.1","HMG59.2","HMG59","HMG61","HMG63","HMG65","HMG67","HMG69","HMG71","HMG73","HMG75","HMG77","HMG79","HMGDD2","HMG81","HMG83","HMG85","HMG88","HMG86","HMG84","HMG82","HMG80","HMG78","HMG76","HMGDD1","HMG74","HMG72","HMG70","HMG68","HMG66","HMG64","HMG62","HMG60","HMG58","HMG56","HMG54","HMG52","HMG50","HMG48","HMG46","HMG44","HMG42","HMG40","HMG38","HMG36","HMG34","HMG32","HMG30","HMG28"]},{"id":"kho-f-ee55","name":"Kho F","codes":["HMFDD1","HMFDD2","HMF01","HMF03","HMF05","HMF07","HMF09","HMF11","HMF13","HMF15","HMF17","HMF19","HMF21","HMF23","HMF25","HMF27","HMF29","HMF31","HMF33","HMF35","HMF37","HMF39","HMF41","HMF43","HMF45","HMF47","HMF49","HMF51","HMF53","HMF55","HMF57","HMF59","HMF61","HMF63","HMF63.3","HMF63.2","HMF63.1","HMF65.1","HMF65.2","HMF65.3","HMF65","HMF67","HMF69","HMF71","HMF73","HMF75","HMF77","HMF79","HMF81","HMF83","HMF85","HMF87","HMF89","HMF91","HMF92","HMF90","HMF88","HMF86","HMF84","HMF82","HMF80","HMF78","HMF76","HMF74","HMF72","HMF70","HMF68","HMF66","HMF66.3","HMF66.2","HMF66.1","HMF64.1","HMF64.2","HMF64.3","HMF64","HMF62","HMF60","HMF58","HMF56","HMF54","HMF52","HMF50","HMF48","HMF46","HMF44","HMF42","HMF40","HMF38","HMF36","HMF34","HMF32","HMF30","HMF28","HMF26","HMF24","HMF22","HMF20","HMF18","HMF16","HMF14","HMF12","HMF10","HMF08","HMF06","HMF04","HMF02"]},{"id":"kho-e-frks","name":"Kho E","codes":["HME01","HME03","HME05","HME07","HME09","HME11","HME13","HME15","HME17","HME19","HME21","HME23","HME25","HME27","HME29","HME31","HME33","HME35","HME37","HMEDD1","HMEDD2","HME39","HME41","HME43","HME45","HME47","HME49","HME51","HME53","HME55","HME57","HME59","HME61","HME63.3","HME63.2","HME63.1","HME81","HME64.2","HME64.1","HME64.3","HME64","HME62","HME60","HME58","HME56","HME54","HME52","HME50","HME48","HME46","HME44","HME42","HME40","HME38","HME36","HME34","HME32","HME30","HME28","HME26","HME24","HME22","HME20","HME18","HME16","HME14","HME12","HME10","HME08","HME06","HME04","HME02"]},{"id":"kho-d-h1zt","name":"Kho D","codes":["HMDDD1","HMDDD2","HMD01","HMD03","HMD05","HMD07","HMD09","HMD11","HMD13","HMD15","HMD17","HMD19","HMD21","HMD23","HMD25","HMD27","HMD29","HMD31","HMD33","HMD35","HMD37","HMD39","HMD41","HMD43","HMD45","HMD47","HMD49","HMD51","HMD53","HMD55","HMD57","HMD59","HMD61","HMD63.3","HMD63.2","HMD63.1","HMDDM1","HMD64.1","HMD64.2","HMD64.3","HMD62","HMD60","HMD58","HMD56","HMD54","HMD52","HMD50","HMD48","HMD46","HMD44","HMD42","HMD40","HMD38","HMD36","HMD34","HMD32","HMD30","HMD28","HMD26","HMD24","HMD22","HMD20","HMD18","HMD16","HMD14","HMD12","HMD10","HMD08","HMD06","HMD04","HMD02"]},{"id":"kho-bl-hzqe","name":"Kho BL","codes":["HMBL2.1","HMBL2.2","HMBL2.3","HMBL2.4","HMBL2.5","HMBL2.6","HMBL2.7","HMPKG B7.0","HMPKG B7.1","HMPKG B7.2","HMPKG B7.3","HMPKG B7.4","HMPKG B7.5","HMPKG B7.6","HMPKG B7.7","HMPKG B7.8","HMPKG B7.9"]},{"id":"kho-c-isnz","name":"Kho C","codes":["HMC66","HMC64.3","HMC64","HMC62","HMC60","HMC58","HMC56","HMC54","HMC52","HMC50","HMC46","HMC44","HMC42","HMC40","HMC38","HMC36","HMC34","HMC32","HMC30","HMC41","HMC43","HMC45","HMC47","HMC49","HMC51","HMC53","HMC55","HMC57","HMC59","HMC61","HMC63","HMC65","HMC67"]},{"id":"kho-l-m410","name":"Kho Lẻ","codes":["HMLOOSE"]}],"lock":{"on":true,"hash":"13cywv5"}}
+</script>
+
+<header class="top">
+  <div class="mark">QR</div>
+  <div>
+    <h1>QR_code_WH_HM</h1>
+    <div class="sub" id="topSub">Chọn kho, rồi chọn vị trí để hiện mã QR</div>
+  </div>
+  <div class="spacer"></div>
+  <button class="tbtn" id="btnPrintAll">In toàn bộ tem</button>
+  <button class="tbtn" id="btnSettings">Cài đặt</button>
+</header>
+
+<div class="banner" id="banner"></div>
+
+<div class="wrap">
+  <aside class="rail">
+    <div class="rail-head">Kho</div>
+    <div class="rail-list" id="whList"></div>
+  </aside>
+
+  <section class="board">
+    <div class="board-head">
+      <div class="search">
+        <span aria-hidden="true" style="color:#9AA6A0">⌕</span>
+        <input id="q" type="text" inputmode="search" autocomplete="off" placeholder="Gõ 1 mã, hoặc dán nhiều mã: HMD01, HMG11, HME05, HMF20">
+        <button class="x" id="qClear" aria-label="Xoá ô tìm">×</button>
+      </div>
+      <div class="count" id="count"></div>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+</div>
+
+<!-- label view -->
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetCode">
+  <div class="sheet-card">
+    <div class="sheet-left"><div class="sticker" id="stickerBig"></div></div>
+    <div class="sheet-right">
+      <div class="eyebrow" id="sheetWh">Kho</div>
+      <div class="big-code" id="sheetCode">—</div>
+      <div class="payload">
+        <div class="k">Nội dung máy quét nhận được</div>
+        <div class="v" id="sheetPayload">—</div>
+      </div>
+      <div class="sheet-actions">
+        <button class="btn primary" id="btnScan">Phóng to để quét</button>
+        <button class="btn" id="btnClose">Xong</button>
+        <button class="btn" id="btnPrintOne">In tem này</button>
+        <div class="nav-pair">
+          <button class="btn ghost" id="btnPrev">← Trước</button>
+          <button class="btn ghost" id="btnNext">Sau →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- settings -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2 id="modalTitle">Cài đặt</h2>
+      <div class="spacer" style="flex:1"></div>
+      <button class="btn" id="modalClose">Đóng</button>
+    </div>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" data-tab="content" aria-selected="true">Nội dung mã QR</button>
+      <button class="tab" role="tab" data-tab="data" aria-selected="false">Kho &amp; vị trí</button>
+      <button class="tab" role="tab" data-tab="backup" aria-selected="false">Sao lưu</button>
+      <button class="tab" role="tab" data-tab="lock" aria-selected="false">Khoá</button>
+    </div>
+    <div class="modal-body">
+
+      <div data-panel="content">
+        <div class="note">
+          <b>Đang dùng đúng định dạng tem thật</b>
+          Mã QR sinh ra chứa chuỗi <code>{"V":"HMD01"}</code> — giống cấu trúc tem đang dán trên kệ. Đổi mẫu bên dưới nếu hệ thống của bạn thay đổi định dạng.
+        </div>
+        <div class="field">
+          <label for="tpl">Mẫu nội dung</label>
+          <input type="text" id="tpl" spellcheck="false">
+          <div class="hint">Chỉ riêng <code>{ma}</code> được thay bằng mã vị trí, mọi ký tự khác giữ nguyên y hệt.<br>
+            <code>{"V":"{ma}"}</code> → <code>{"V":"HMD01"}</code> · <code>{ma}</code> → <code>HMD01</code></div>
+          <div class="warn" id="tplWarn" hidden>Mẫu đang thiếu <code>{ma}</code> — mọi vị trí sẽ ra cùng một mã QR.</div>
+        </div>
+        <div class="field">
+          <label for="ecc">Mức chống lỗi</label>
+          <select id="ecc">
+            <option value="L">L — giống tem gốc, ô vuông to nhất (khuyên dùng)</option>
+            <option value="M">M — tiêu chuẩn</option>
+            <option value="Q">Q — chịu bẩn, xước tốt hơn</option>
+            <option value="H">H — chịu bẩn tốt nhất, ô vuông nhỏ nhất</option>
+          </select>
+          <div class="hint">Tem gốc trên kệ dùng mức L. Giữ mức này thì mã web tạo ra có đúng 21×21 ô như tem giấy. Chỉ đổi lên Q hoặc H khi in tem cho nơi hay bám bụi.</div>
+        </div>
+        <div class="field">
+          <label for="forceVer">Cỡ ma trận</label>
+          <select id="forceVer">
+            <option value="0">Tự động — ô vuông to nhất có thể</option>
+            <option value="2">25×25 ô</option>
+            <option value="3">29×29 ô</option>
+            <option value="4">33×33 ô — giống tem in sẵn</option>
+          </select>
+          <div class="hint" id="verInfo"></div>
+        </div>
+        <div class="field">
+          <label style="display:flex;align-items:center;gap:10px;font-weight:600">
+            <input type="checkbox" id="directScan" style="width:22px;height:22px;flex:none">
+            Chạm vào vị trí là mở thẳng màn hình quét
+          </label>
+          <div class="hint">Bỏ dấu chọn nếu bạn muốn xem tem trước rồi mới bấm “Phóng to để quét”.</div>
+        </div>
+        <div class="field">
+          <label>Xem trước</label>
+          <div class="preview">
+            <div class="mini"><div class="sticker" id="tplPreview"></div></div>
+            <div>
+              <div class="eyebrow">Máy quét sẽ nhận</div>
+              <div class="v" id="tplText" style="font-family:var(--mono);font-size:16px;margin-top:6px;word-break:break-all"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div data-panel="data" hidden>
+        <div class="field row">
+          <div>
+            <label for="whPick">Kho đang sửa</label>
+            <select id="whPick"></select>
+          </div>
+          <div class="narrow"><button class="btn" id="whAdd">Thêm kho</button></div>
+          <div class="narrow"><button class="btn" id="whRename">Đổi tên</button></div>
+          <div class="narrow"><button class="btn danger" id="whDelete">Xoá kho</button></div>
+        </div>
+        <div class="field gen">
+          <label for="genPattern">Tạo nhanh danh sách vị trí</label>
+          <div class="row">
+            <div><textarea id="genPattern" rows="3" spellcheck="false" style="min-height:96px">HME{01-64}</textarea></div>
+            <div class="narrow"><button class="btn" id="genAdd">Chèn vào danh sách</button></div>
+          </div>
+          <div class="hint">
+            Viết khoảng số trong ngoặc nhọn, phần chữ giữ nguyên:<br>
+            <code>HME{01-90}</code> → HME01 … HME90 (giữ đúng 2 chữ số)<br>
+            <code>HME63.{1-3}</code> → HME63.1, HME63.2, HME63.3<br>
+            <code>HMEDD</code> → chỉ một mã lẻ<br>
+            Viết nhiều mẫu cùng lúc bằng cách xuống dòng hoặc ngăn bởi dấu phẩy.
+          </div>
+        </div>
+        <div class="field">
+          <label for="locText">Danh sách vị trí — mỗi dòng một mã</label>
+          <textarea id="locText" spellcheck="false"></textarea>
+          <div class="hint">Dán trực tiếp từ Excel cũng được. Dòng trống và mã trùng sẽ tự bỏ qua.</div>
+        </div>
+        <button class="btn primary" id="locSave">Lưu danh sách</button>
+      </div>
+
+      <div data-panel="backup" hidden>
+        <div class="note">
+          <b>Dữ liệu nằm trên chính máy này</b>
+          Mỗi máy tính bảng lưu riêng. Muốn dùng chung, xuất file ở máy đã cấu hình xong rồi nhập vào các máy còn lại.
+        </div>
+        <div class="note">
+          <b>Muốn mọi máy dùng chung một danh sách?</b>
+          Sau khi thêm/sửa kho ở máy này, bấm “Tạo file để đăng lại lên web”. File tải về đã kèm sẵn danh sách hiện tại — kéo file đó lên Netlify là mọi máy mở link sẽ tự cập nhật ở lần tải trang sau.
+        </div>
+        <div class="field">
+          <label>Đưa danh sách vào file web</label>
+          <div class="row">
+            <button class="btn primary" id="btnBuildSite">Tạo file để đăng lại lên web</button>
+            <button class="btn" id="btnReseed">Nạp lại danh sách từ file</button>
+          </div>
+          <div class="hint" id="seedInfo"></div>
+        </div>
+        <div class="field">
+          <label>Chuyển dữ liệu giữa hai máy</label>
+          <div class="row">
+            <button class="btn" id="btnExport">Xuất file .json</button>
+            <button class="btn" id="btnImport">Nhập từ file .json</button>
+            <input type="file" id="fileImport" accept="application/json,.json" hidden>
+          </div>
+        </div>
+        <div class="field">
+          <label>Khôi phục</label>
+          <button class="btn danger" id="btnReset">Trả về danh sách gốc (Kho D)</button>
+          <div class="hint">Xoá mọi thay đổi trên máy này và nạp lại danh sách vị trí ban đầu.</div>
+        </div>
+        <div class="field">
+          <label>Trạng thái lưu</label>
+          <div class="hint" id="storeState"></div>
+        </div>
+      </div>
+
+      <div data-panel="lock" hidden>
+        <div class="note">
+          <b>Khoá chống sửa nhầm, không phải bảo mật</b>
+          Mã PIN chỉ nằm trong file nên người rành kỹ thuật vẫn có thể vượt qua. Mục đích là để nhân viên đứng máy không vô tình xoá kho hay đổi danh sách.
+        </div>
+        <div class="field">
+          <label>Trạng thái</label>
+          <div class="hint" id="lockState"></div>
+        </div>
+        <div class="field">
+          <label for="pinNew">Đặt mã PIN (4–8 chữ số)</label>
+          <div class="row">
+            <div><input type="text" id="pinNew" inputmode="numeric" maxlength="8" placeholder="ví dụ 2468"></div>
+            <div><input type="text" id="pinNew2" inputmode="numeric" maxlength="8" placeholder="nhập lại"></div>
+            <div class="narrow"><button class="btn primary" id="pinSet">Bật khoá</button></div>
+            <div class="narrow"><button class="btn danger" id="pinOff">Bỏ khoá</button></div>
+          </div>
+          <div class="hint">
+            Ai biết mã này thì mở được Cài đặt — đó là cách bạn phân quyền cho người khác. Mỗi lần mở lại app, lần đầu vào Cài đặt sẽ phải nhập mã.<br>
+            Sau khi bật hoặc đổi mã, nhớ sang tab Sao lưu bấm “Tạo file để đăng lại lên web” rồi đăng lên Netlify, các máy khác mới nhận khoá.<br>
+            Quên mã: đăng lại file cũ chưa khoá, hoặc xoá dữ liệu trang trong cài đặt trình duyệt của máy đó.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="scanview" id="scanview" role="dialog" aria-modal="true">
+  <button class="btn exit" id="scanExit">Đóng</button>
+  <canvas id="scanCanvas"></canvas>
+  <div class="scode" id="scanCode">—</div>
+  <div class="shint">Để màn hình sáng tối đa, giữ máy quét cách khoảng 15–25 cm và nghiêng nhẹ để tránh loá.</div>
+  <div class="shint" id="scanInfo" style="font-family:var(--mono);font-size:12px"></div>
+  <div class="skip">
+    <button class="btn" id="scanPrev">← Trước</button>
+    <button class="btn" id="scanNext">Sau →</button>
+    <button class="btn" id="scanBigger">Ô to hơn</button>
+    <button class="btn" id="scanSmaller">Ô nhỏ hơn</button>
+    <button class="btn" id="scanInvert">Đảo màu</button>
+    <button class="btn" id="scanSizes">Thử 4 cỡ</button>
+    <button class="btn" id="scanCompare">Ảnh gốc…</button>
+  </div>
+</div>
+
+<div class="sizetest" id="sizetest" role="dialog" aria-modal="true">
+  <button class="btn exit" id="sizeExit">Đóng</button>
+  <h2 id="sizeTitle">Thử cỡ mã</h2>
+  <div class="lead">Quét lần lượt bốn mã dưới đây bằng CK65, giữ khoảng cách như khi quét tem trên kệ. Mã nào máy đọc được thì bấm “Dùng cỡ này” ngay dưới nó — app sẽ dùng cỡ đó cho mọi vị trí về sau.</div>
+  <div id="sizeRows"></div>
+</div>
+
+<div class="compare" id="compare" role="dialog" aria-modal="true">
+  <button class="btn exit" id="compareExit">Đóng</button>
+  <img id="compareImg" alt="Ảnh mã QR gốc">
+  <div class="cap">Ảnh gốc bạn tách từ file PDF, hiển thị trên chính màn hình này. Quét thử: nếu ảnh này cũng không đọc được thì vấn đề nằm ở việc quét qua màn hình, không phải ở mã do web tạo.</div>
+</div>
+<input type="file" id="compareFile" accept="image/*" hidden>
+
+<div class="modal" id="printdlg" role="dialog" aria-modal="true" aria-labelledby="printTitle">
+  <div class="modal-card" style="max-width:560px">
+    <div class="modal-head">
+      <h2 id="printTitle">In tem hàng loạt</h2>
+      <div style="flex:1"></div>
+      <button class="btn" id="printClose">Đóng</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label for="prStyle">Kiểu tem</label>
+        <select id="prStyle">
+          <option value="plain">Đen trắng, mã ghi bên dưới</option>
+          <option value="tem">Tem xanh có khung như tem đang dán</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="prPerPage">Số tem mỗi trang A4</label>
+        <select id="prPerPage">
+          <option value="2">2 tem</option>
+          <option value="4" selected>4 tem</option>
+          <option value="6">6 tem</option>
+          <option value="9">9 tem</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="prScope">In những vị trí nào</label>
+        <select id="prScope">
+          <option value="all">Toàn bộ kho đang chọn</option>
+          <option value="every">Tất cả các kho, in lần lượt từng kho</option>
+          <option value="filtered">Chỉ những mã đang hiển thị trên màn hình</option>
+        </select>
+        <div class="hint" id="prInfo"></div>
+      </div>
+      <div class="field">
+        <label style="display:flex;align-items:center;gap:10px;font-weight:600">
+          <input type="checkbox" id="prBlank" style="width:22px;height:22px;flex:none">
+          Máy in đang bật in hai mặt — chèn trang trắng xen kẽ
+        </label>
+        <div class="hint">
+          Cách gọn nhất là tắt in hai mặt trong hộp thoại in của Chrome (mục “Cài đặt khác” → bỏ chọn “In hai mặt”), hoặc đổi mặc định của máy in trong Windows.
+          Nếu không đổi được, bật ô này: app chèn một trang trắng sau mỗi trang tem, mặt sau mỗi tờ để trống nên vẫn ra mỗi tờ một mặt.
+        </div>
+      </div>
+      <button class="btn primary" id="prGo">Tạo bản in</button>
+    </div>
+  </div>
+</div>
+
+<div class="ask" id="ask" role="dialog" aria-modal="true" aria-labelledby="askTitle">
+  <div class="ask-card">
+    <h3 id="askTitle">—</h3>
+    <p id="askText"></p>
+    <input type="text" id="askInput" spellcheck="false">
+    <div class="ask-actions">
+      <button class="btn" id="askCancel">Huỷ</button>
+      <button class="btn primary" id="askOk">Đồng ý</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="printRoot"></div>
+<script>
+/* Minimal QR Code encoder (byte mode, versions 1-40, ECC L/M/Q/H)
+   Returns a boolean matrix. No dependencies. */
+var QR = (function () {
+  var ECC = { L: 0, M: 1, Q: 2, H: 3 };
+  var FORMAT_BITS = [1, 0, 3, 2]; // L,M,Q,H
+
+  var ECC_CW_PER_BLOCK = [
+    // ver 1..40
+    [7,10,15,20,26,18,20,24,30,18,20,24,26,30,22,24,28,30,28,28,28,28,30,30,26,28,30,30,30,30,30,30,30,30,30,30,30,30,30,30], // L
+    [10,16,26,18,24,16,18,22,22,26,30,22,22,24,24,28,28,26,26,26,26,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28], // M
+    [13,22,18,26,18,24,18,22,20,24,28,26,24,20,30,24,28,28,26,30,28,30,30,30,30,28,30,30,30,30,30,30,30,30,30,30,30,30,30,30], // Q
+    [17,28,22,16,22,28,26,26,24,28,24,28,22,24,24,30,28,28,26,28,30,24,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30]  // H
+  ];
+  var NUM_BLOCKS = [
+    [1,1,1,1,1,2,2,2,2,4,4,4,4,4,6,6,6,6,7,8,8,9,9,10,12,12,12,13,14,15,16,17,18,19,19,20,21,22,24,25],
+    [1,1,1,2,2,4,4,4,5,5,5,8,9,9,10,10,11,13,14,16,17,17,18,20,21,23,25,26,28,29,31,33,35,37,38,40,43,45,47,49],
+    [1,1,2,2,4,4,6,6,8,8,8,10,12,16,12,17,16,18,21,20,23,23,25,27,29,34,34,35,38,40,43,45,48,51,53,56,59,62,65,68],
+    [1,1,2,4,4,4,5,6,8,8,11,11,16,16,18,16,19,21,25,25,25,34,30,32,35,37,40,42,45,48,51,54,57,60,63,66,70,74,77,81]
+  ];
+
+  function toUtf8(str) {
+    var out = [], i, c;
+    var enc = encodeURIComponent(str);
+    for (i = 0; i < enc.length; i++) {
+      c = enc.charAt(i);
+      if (c === '%') { out.push(parseInt(enc.substr(i + 1, 2), 16)); i += 2; }
+      else out.push(c.charCodeAt(0));
+    }
+    return out;
+  }
+
+  function numRawDataModules(ver) {
+    var result = (16 * ver + 128) * ver + 64;
+    if (ver >= 2) {
+      var numAlign = Math.floor(ver / 7) + 2;
+      result -= (25 * numAlign - 10) * numAlign - 55;
+      if (ver >= 7) result -= 36;
+    }
+    return result;
+  }
+
+  function numDataCodewords(ver, ecl) {
+    return Math.floor(numRawDataModules(ver) / 8)
+      - ECC_CW_PER_BLOCK[ecl][ver - 1] * NUM_BLOCKS[ecl][ver - 1];
+  }
+
+  function alignPositions(ver) {
+    if (ver === 1) return [];
+    var numAlign = Math.floor(ver / 7) + 2;
+    var step = (ver === 32) ? 26 : Math.ceil((ver * 4 + 4) / (numAlign * 2 - 2)) * 2;
+    var size = ver * 4 + 17;
+    var result = [6];
+    for (var pos = size - 7; result.length < numAlign; pos -= step) result.splice(1, 0, pos);
+    return result;
+  }
+
+  // --- Galois field arithmetic ---
+  var EXP = new Array(512), LOG = new Array(256);
+  (function () {
+    var x = 1;
+    for (var i = 0; i < 255; i++) {
+      EXP[i] = x; LOG[x] = i;
+      x <<= 1;
+      if (x & 0x100) x ^= 0x11D;
+    }
+    for (var j = 255; j < 512; j++) EXP[j] = EXP[j - 255];
+  })();
+  function gfMul(a, b) { return (a === 0 || b === 0) ? 0 : EXP[LOG[a] + LOG[b]]; }
+
+  function rsGenerator(degree) {
+    var poly = [1];
+    for (var i = 0; i < degree; i++) {
+      var next = new Array(poly.length + 1).fill(0);
+      for (var j = 0; j < poly.length; j++) {
+        next[j] ^= gfMul(poly[j], 1);
+        next[j + 1] ^= gfMul(poly[j], EXP[i]);
+      }
+      poly = next;
+    }
+    return poly; // length degree+1, leading coeff 1
+  }
+
+  function rsRemainder(data, gen) {
+    var degree = gen.length - 1;
+    var result = new Array(degree).fill(0);
+    for (var i = 0; i < data.length; i++) {
+      var factor = data[i] ^ result[0];
+      result.shift(); result.push(0);
+      for (var j = 0; j < degree; j++) result[j] ^= gfMul(gen[j + 1], factor);
+    }
+    return result;
+  }
+
+  // --- bit buffer ---
+  function BitBuf() { this.bits = []; }
+  BitBuf.prototype.put = function (val, len) {
+    for (var i = len - 1; i >= 0; i--) this.bits.push((val >>> i) & 1);
+  };
+
+  function buildCodewords(bytes, ver, ecl) {
+    var bb = new BitBuf();
+    bb.put(4, 4); // byte mode
+    bb.put(bytes.length, ver < 10 ? 8 : 16);
+    for (var i = 0; i < bytes.length; i++) bb.put(bytes[i], 8);
+    var capacityBits = numDataCodewords(ver, ecl) * 8;
+    bb.put(0, Math.min(4, capacityBits - bb.bits.length));
+    while (bb.bits.length % 8 !== 0) bb.bits.push(0);
+    var data = [];
+    for (var k = 0; k < bb.bits.length; k += 8) {
+      var b = 0;
+      for (var j = 0; j < 8; j++) b = (b << 1) | bb.bits[k + j];
+      data.push(b);
+    }
+    var pad = [0xEC, 0x11], p = 0;
+    while (data.length < capacityBits / 8) { data.push(pad[p]); p ^= 1; }
+    return data;
+  }
+
+  function interleave(data, ver, ecl) {
+    var numBlocks = NUM_BLOCKS[ecl][ver - 1];
+    var eccLen = ECC_CW_PER_BLOCK[ecl][ver - 1];
+    var rawCw = Math.floor(numRawDataModules(ver) / 8);
+    var numShort = numBlocks - rawCw % numBlocks;
+    var shortLen = Math.floor(rawCw / numBlocks) - eccLen;
+    var gen = rsGenerator(eccLen);
+    var blocks = [], eccs = [], off = 0;
+    for (var i = 0; i < numBlocks; i++) {
+      var len = shortLen + (i < numShort ? 0 : 1);
+      var blk = data.slice(off, off + len); off += len;
+      blocks.push(blk);
+      eccs.push(rsRemainder(blk, gen));
+    }
+    var result = [], j;
+    for (j = 0; j < shortLen + 1; j++) {
+      for (i = 0; i < numBlocks; i++) if (j < blocks[i].length) result.push(blocks[i][j]);
+    }
+    for (j = 0; j < eccLen; j++) {
+      for (i = 0; i < numBlocks; i++) result.push(eccs[i][j]);
+    }
+    return result;
+  }
+
+  function makeMatrix(ver, ecl, codewords) {
+    var size = ver * 4 + 17;
+    var m = [], fn = [], r, c;
+    for (r = 0; r < size; r++) {
+      m.push(new Array(size).fill(false));
+      fn.push(new Array(size).fill(false));
+    }
+    function setFn(x, y, v) {
+      if (x < 0 || y < 0 || x >= size || y >= size) return;
+      m[y][x] = v; fn[y][x] = true;
+    }
+    // finder patterns
+    function finder(cx, cy) {
+      for (var dy = -4; dy <= 4; dy++) for (var dx = -4; dx <= 4; dx++) {
+        var d = Math.max(Math.abs(dx), Math.abs(dy));
+        setFn(cx + dx, cy + dy, d !== 2 && d !== 4);
+      }
+    }
+    // timing trước, rồi finder đè lên — đúng thứ tự chuẩn, nếu ngược lại
+    // hàng/cột timing sẽ ăn mất viền dưới và viền phải của ô định vị
+    for (var i = 0; i < size; i++) { setFn(6, i, i % 2 === 0); setFn(i, 6, i % 2 === 0); }
+    finder(3, 3); finder(size - 4, 3); finder(3, size - 4);
+    // alignment
+    var ap = alignPositions(ver);
+    for (var a = 0; a < ap.length; a++) for (var b = 0; b < ap.length; b++) {
+      if ((a === 0 && b === 0) || (a === 0 && b === ap.length - 1) || (a === ap.length - 1 && b === 0)) continue;
+      for (var dy = -2; dy <= 2; dy++) for (var dx = -2; dx <= 2; dx++)
+        setFn(ap[b] + dx, ap[a] + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1);
+    }
+    // reserve format areas (dummy bits, rewritten after masking)
+    drawFormat(m, fn, size, ecl, 0);
+    // version info
+    if (ver >= 7) {
+      var rem = ver;
+      for (i = 0; i < 12; i++) rem = (rem << 1) ^ ((rem >>> 11) * 0x1F25);
+      var bitsV = (ver << 12) | rem;
+      for (i = 0; i < 18; i++) {
+        var bit = ((bitsV >>> i) & 1) === 1;
+        var x = Math.floor(i / 3), y = size - 11 + (i % 3);
+        setFn(x, y, bit); setFn(y, x, bit);
+      }
+    }
+    // data placement
+    var idx = 0, upward = true;
+    for (var right = size - 1; right >= 1; right -= 2) {
+      if (right === 6) right = 5;
+      for (var vert = 0; vert < size; vert++) {
+        for (var j = 0; j < 2; j++) {
+          var x = right - j;
+          var y = upward ? (size - 1 - vert) : vert;
+          if (!fn[y][x] && idx < codewords.length * 8) {
+            m[y][x] = ((codewords[idx >>> 3] >>> (7 - (idx & 7))) & 1) === 1;
+            idx++;
+          }
+        }
+      }
+      upward = !upward;
+    }
+    return { m: m, fn: fn, size: size };
+  }
+
+  function applyMask(m, fn, size, mask) {
+    for (var y = 0; y < size; y++) for (var x = 0; x < size; x++) {
+      if (fn[y][x]) continue;
+      var invert;
+      switch (mask) {
+        case 0: invert = (x + y) % 2 === 0; break;
+        case 1: invert = y % 2 === 0; break;
+        case 2: invert = x % 3 === 0; break;
+        case 3: invert = (x + y) % 3 === 0; break;
+        case 4: invert = (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0; break;
+        case 5: invert = (x * y) % 2 + (x * y) % 3 === 0; break;
+        case 6: invert = ((x * y) % 2 + (x * y) % 3) % 2 === 0; break;
+        case 7: invert = ((x + y) % 2 + (x * y) % 3) % 2 === 0; break;
+      }
+      if (invert) m[y][x] = !m[y][x];
+    }
+  }
+
+  function drawFormat(m, fn, size, ecl, mask) {
+    var data = (FORMAT_BITS[ecl] << 3) | mask;
+    var rem = data;
+    for (var i = 0; i < 10; i++) rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
+    var bits = ((data << 10) | rem) ^ 0x5412;
+    function set(x, y, v) { m[y][x] = v; fn[y][x] = true; }
+    for (i = 0; i <= 5; i++) set(8, i, ((bits >>> i) & 1) === 1);
+    set(8, 7, ((bits >>> 6) & 1) === 1);
+    set(8, 8, ((bits >>> 7) & 1) === 1);
+    set(7, 8, ((bits >>> 8) & 1) === 1);
+    for (i = 9; i < 15; i++) set(14 - i, 8, ((bits >>> i) & 1) === 1);
+    for (i = 0; i < 8; i++) set(size - 1 - i, 8, ((bits >>> i) & 1) === 1);
+    for (i = 8; i < 15; i++) set(8, size - 15 + i, ((bits >>> i) & 1) === 1);
+    set(8, size - 8, true);
+  }
+
+  function penalty(m, size) {
+    var p = 0, x, y, i;
+    // rule 1: runs
+    for (y = 0; y < size; y++) {
+      var run = 1;
+      for (x = 1; x < size; x++) {
+        if (m[y][x] === m[y][x - 1]) { run++; if (run === 5) p += 3; else if (run > 5) p++; }
+        else run = 1;
+      }
+    }
+    for (x = 0; x < size; x++) {
+      run = 1;
+      for (y = 1; y < size; y++) {
+        if (m[y][x] === m[y - 1][x]) { run++; if (run === 5) p += 3; else if (run > 5) p++; }
+        else run = 1;
+      }
+    }
+    // rule 2: 2x2 blocks
+    for (y = 0; y < size - 1; y++) for (x = 0; x < size - 1; x++) {
+      var v = m[y][x];
+      if (v === m[y][x + 1] && v === m[y + 1][x] && v === m[y + 1][x + 1]) p += 3;
+    }
+    // rule 3: finder-like patterns
+    var pat = [true, false, true, true, true, false, true, false, false, false, false];
+    var patRev = [false, false, false, false, true, false, true, true, true, false, true];
+    function match(get, len) {
+      var count = 0;
+      for (var s = 0; s + 11 <= len; s++) {
+        var ok1 = true, ok2 = true;
+        for (var k = 0; k < 11; k++) {
+          var vv = get(s + k);
+          if (vv !== pat[k]) ok1 = false;
+          if (vv !== patRev[k]) ok2 = false;
+        }
+        if (ok1 || ok2) count++;
+      }
+      return count;
+    }
+    for (y = 0; y < size; y++) p += 40 * match(function (k) { return m[y][k]; }, size);
+    for (x = 0; x < size; x++) p += 40 * match(function (k) { return m[k][x]; }, size);
+    // rule 4: balance
+    var dark = 0;
+    for (y = 0; y < size; y++) for (x = 0; x < size; x++) if (m[y][x]) dark++;
+    var total = size * size;
+    var k5 = Math.floor(Math.abs(dark * 20 - total * 10) / total);
+    p += k5 * 10;
+    return p;
+  }
+
+  function minVersion(text, eclName) {
+    var ecl = ECC[eclName || 'M'];
+    var len = toUtf8(String(text)).length;
+    for (var v = 1; v <= 40; v++) {
+      if (4 + (v < 10 ? 8 : 16) + len * 8 <= numDataCodewords(v, ecl) * 8) return v;
+    }
+    return 40;
+  }
+
+  function encode(text, eclName, minVer) {
+    var ecl = ECC[eclName || 'M'];
+    var bytes = toUtf8(String(text));
+    var ver = Math.max(1, Math.min(40, minVer || 1));
+    while (ver <= 40) {
+      var cap = numDataCodewords(ver, ecl);
+      var headerBits = 4 + (ver < 10 ? 8 : 16);
+      if (headerBits + bytes.length * 8 <= cap * 8) break;
+      ver++;
+    }
+    if (ver > 40) throw new Error('Nội dung quá dài cho một mã QR');
+    var data = buildCodewords(bytes, ver, ecl);
+    var cw = interleave(data, ver, ecl);
+    var built = makeMatrix(ver, ecl, cw);
+    var best = null, bestP = Infinity, bestMask = 0;
+    for (var mask = 0; mask < 8; mask++) {
+      var mm = built.m.map(function (row) { return row.slice(); });
+      var ff = built.fn.map(function (row) { return row.slice(); });
+      applyMask(mm, ff, built.size, mask);
+      drawFormat(mm, ff, built.size, ecl, mask);
+      var pen = penalty(mm, built.size);
+      if (pen < bestP) { bestP = pen; best = mm; bestMask = mask; }
+    }
+    return { modules: best, size: built.size, version: ver, mask: bestMask };
+  }
+
+  function toSvgPath(modules, size) {
+    var d = '';
+    for (var y = 0; y < size; y++) for (var x = 0; x < size; x++) {
+      if (modules[y][x]) d += 'M' + x + ' ' + y + 'h1v1h-1z';
+    }
+    return d;
+  }
+
+  return { encode: encode, toSvgPath: toSvgPath, minVersion: minVersion };
+})();
+
+if (typeof module !== 'undefined') module.exports = QR;
+
+</script>
+<script>
+(function () {
+  'use strict';
+  var KEY = 'khoqr.v3';
+  var OLD_KEY = 'khoqr.v2';
+  var OLDER_KEY = 'khoqr.v1';
+  var DEFAULT_TPL = '{"V":"{ma}"}';
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); };
+
+  function defaultCodes() {
+    var list = [], i;
+    for (i = 1; i <= 63; i++) {
+      if (i === 38) continue; // không có trong file tem gốc
+      list.push('HMD' + (i < 10 ? '0' + i : i));
+    }
+    return list.concat(['HMD63.1', 'HMD63.2', 'HMD63.3', 'HMD64.1', 'HMD64.2', 'HMD64.3', 'HMDDD', 'HMDDM', 'HMDDM1']);
+  }
+  function readSeed() {
+    try {
+      var el = document.getElementById('seedData');
+      var s = JSON.parse(el.textContent);
+      if (s && s.warehouses && s.warehouses.length) return s;
+    } catch (e) { }
+    return null;
+  }
+  function seedWarehouses() {
+    var s = readSeed();
+    if (s) return JSON.parse(JSON.stringify(s.warehouses));
+    return [{ id: 'kho-d', name: 'Kho D', codes: defaultCodes() }];
+  }
+  function applySeed(force) {
+    var s = readSeed();
+    if (!s) return false;
+    if (!force && (state.seedVersion || 0) >= s.version) return false;
+    state.warehouses = JSON.parse(JSON.stringify(s.warehouses));
+    state.seedVersion = s.version;
+    if (s.lock) state.lock = { on: !!s.lock.on, hash: s.lock.hash || '' };
+    if (!state.warehouses.filter(function (w) { return w.id === state.activeId; }).length) {
+      state.activeId = state.warehouses[0].id;
+    }
+    save();
+    return true;
+  }
+
+  function defaultState() {
+    return {
+      tpl: DEFAULT_TPL, ecc: 'L', forceVer: 0, directScan: true, modPx: 0, invert: false, activeId: 'kho-d',
+      seedVersion: 0,
+      lock: { on: false, hash: '' },
+      warehouses: seedWarehouses()
+    };
+  }
+
+  var state = defaultState(), storageOk = true;
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY), s;
+      if (raw) {
+        s = JSON.parse(raw);
+        if (s && s.warehouses && s.warehouses.length) state = s;
+        return;
+      }
+      // bản cũ: giữ lại kho & vị trí, còn thông số vẽ mã thì lấy theo mặc định mới
+      raw = localStorage.getItem(OLD_KEY) || localStorage.getItem(OLDER_KEY);
+      if (raw) {
+        s = JSON.parse(raw);
+        if (s && s.warehouses && s.warehouses.length) {
+          state.warehouses = s.warehouses;
+          state.activeId = s.activeId || s.warehouses[0].id;
+          save();
+        }
+      }
+    } catch (e) { storageOk = false; }
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); }
+    catch (e) { storageOk = false; showBanner(); }
+  }
+  function showBanner() {
+    var el = $('banner');
+    if (!el || storageOk) return;
+    el.innerHTML = '<b>Máy này đang chặn lưu trữ.</b> Thêm hay sửa vẫn dùng được ngay, nhưng tải lại trang là mất. Mở file bằng Chrome (không mở trong ứng dụng khác) hoặc dùng Cài đặt → Sao lưu để xuất file.';
+    el.classList.add('on');
+  }
+  function active() {
+    var w = state.warehouses.filter(function (x) { return x.id === state.activeId; })[0];
+    return w || state.warehouses[0];
+  }
+  function payloadOf(code) { return String(state.tpl || DEFAULT_TPL).split('{ma}').join(code); }
+
+  /* ---------- sticker ---------- */
+  function stickerHTML(code) {
+    var r, path, size;
+    try {
+      r = QR.encode(payloadOf(code), state.ecc || 'M', listVer);
+      size = r.size;
+      path = QR.toSvgPath(r.modules, size);
+    } catch (e) {
+      return '<div class="panel" style="color:#9B2222;font-size:12px;text-align:center">Không tạo được mã QR</div><div class="band">!</div>';
+    }
+    var vb = (-2) + ' ' + (-2) + ' ' + (size + 4) + ' ' + (size + 4);
+    var k = Math.min(12, 52 / Math.max(4, code.length));
+    return '<div class="panel"><svg viewBox="' + vb + '" shape-rendering="crispEdges" role="img" aria-label="Mã QR ' + esc(code) + '">' +
+      '<path d="' + path + '" fill="#000"/></svg></div>' +
+      '<div class="band" style="font-size:' + k.toFixed(2) + 'cqw">' + esc(code) + '</div>';
+  }
+
+  /* ---------- cỡ ma trận dùng chung cho cả danh sách ---------- */
+  var listVer = 1;
+  function refreshVersion() {
+    var mx = 1;
+    state.warehouses.forEach(function (w) {
+      w.codes.forEach(function (c) {
+        var v = QR.minVersion(payloadOf(c), state.ecc || 'M');
+        if (v > mx) mx = v;
+      });
+    });
+    listVer = Math.max(mx, state.forceVer || 0);
+    return listVer;
+  }
+
+  /* ---------- canvas: mỗi ô vuông là số nguyên điểm ảnh, không nhoè ---------- */
+  function paint(canvas, code, availCss, allowManual) {
+    var r = QR.encode(payloadOf(code), state.ecc || 'M', listVer);
+    var dpr = window.devicePixelRatio || 1;
+    var total = r.size + 8;
+    var fit = Math.max(2, Math.floor(availCss / total));   // số px CSS cho mỗi ô, số nguyên
+    var mod = fit;
+    if (allowManual && state.modPx) mod = Math.max(3, Math.min(state.modPx, fit));
+    var k = Math.max(2, Math.round(mod * dpr));            // số điểm ảnh thật cho mỗi ô
+    canvas.width = total * k; canvas.height = total * k;
+    canvas.style.width = (total * mod) + 'px';
+    canvas.style.height = 'auto';
+    var dark = state.invert ? '#FFFFFF' : '#000000';
+    var light = state.invert ? '#000000' : '#FFFFFF';
+    var ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.fillStyle = light; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = dark;
+    for (var y = 0; y < r.size; y++) {
+      for (var x = 0; x < r.size; x++) {
+        if (r.modules[y][x]) ctx.fillRect((x + 4) * k, (y + 4) * k, k, k);
+      }
+    }
+    r.mod = mod; r.fit = fit;
+    return r;
+  }
+  function fillSticker(el, code) {
+    var k = Math.min(12, 52 / Math.max(4, code.length));
+    el.innerHTML = '<div class="panel"><canvas></canvas></div>' +
+      '<div class="band" style="font-size:' + k.toFixed(2) + 'cqw">' + esc(code) + '</div>';
+    var panel = el.querySelector('.panel');
+    var avail = Math.max(120, panel.clientWidth - 4);
+    paint(el.querySelector('canvas'), code, avail);
+  }
+
+  /* ---------- khoá cài đặt bằng mã PIN ---------- */
+  var unlocked = false;
+  function pinHash(pin) {
+    var s = 'khoqr:' + String(pin), hsh = 2166136261 >>> 0;
+    for (var i = 0; i < s.length; i++) {
+      hsh ^= s.charCodeAt(i);
+      hsh = Math.imul(hsh, 16777619) >>> 0;
+    }
+    return hsh.toString(36);
+  }
+  function locked() { return !!(state.lock && state.lock.on && state.lock.hash) && !unlocked; }
+
+  /* ---------- hộp thoại trong app (thay prompt/confirm bị chặn) ---------- */
+  var askCb = null;
+  function ask(title, text, value, okText, cb, opts) {
+    opts = opts || {};
+    $('askTitle').textContent = title;
+    $('askText').textContent = text || '';
+    var inp = $('askInput');
+    inp.type = opts.password ? 'password' : 'text';
+    inp.setAttribute('inputmode', opts.password ? 'numeric' : 'text');
+    if (value === null) { inp.hidden = true; } else { inp.hidden = false; inp.value = value; }
+    $('askOk').textContent = okText || 'Đồng ý';
+    askCb = cb;
+    $('ask').classList.add('on');
+    setTimeout(function () { (value === null ? $('askOk') : inp).focus(); }, 30);
+  }
+  function askClose() { $('ask').classList.remove('on'); askCb = null; }
+
+  /* ---------- render ---------- */
+  function renderRail() {
+    $('whList').innerHTML = state.warehouses.map(function (w) {
+      return '<button class="wh" data-id="' + esc(w.id) + '" aria-current="' + (w.id === active().id) + '">' +
+        esc(w.name) + '<small>' + w.codes.length + ' vị trí</small></button>';
+    }).join('');
+  }
+
+  var filtered = [];      // [{code, whId, whName}] đúng thứ tự đang hiển thị
+  function findCode(term) {
+    var hit = [], up = term.toUpperCase();
+    state.warehouses.forEach(function (w) {
+      w.codes.forEach(function (c) {
+        if (c.toUpperCase() === up) hit.push({ code: c, whId: w.id, whName: w.name, exact: true });
+      });
+    });
+    if (hit.length) return hit;
+    state.warehouses.forEach(function (w) {
+      w.codes.forEach(function (c) {
+        if (c.toUpperCase().indexOf(up) >= 0 && hit.length < 300) {
+          hit.push({ code: c, whId: w.id, whName: w.name, exact: false });
+        }
+      });
+    });
+    return hit;
+  }
+
+  function renderGrid() {
+    var w = active(), raw = $('q').value.trim();
+    var terms = raw ? raw.split(/[\s,;]+/).filter(Boolean) : [];
+    refreshVersion();
+    $('topSub').textContent = w.name + ' · ' + w.codes.length + ' vị trí';
+
+    var html = '', missing = [];
+    filtered = [];
+
+    if (terms.length > 1) {
+      // dán một loạt mã: giữ đúng thứ tự bạn gõ, gom từ mọi kho
+      var seen = {};
+      terms.forEach(function (t) {
+        var hits = findCode(t);
+        if (!hits.length) { missing.push(t); return; }
+        hits.forEach(function (o) {
+          var k = o.whId + '|' + o.code;
+          if (seen[k]) return;
+          seen[k] = 1; filtered.push(o);
+        });
+      });
+      $('count').textContent = filtered.length + ' mã đã chọn';
+      html = filtered.map(function (o) {
+        return '<button class="loc" data-code="' + esc(o.code) + '" data-wh="' + esc(o.whId) + '">' +
+          esc(o.code) + '<span class="whtag">' + esc(o.whName) + '</span></button>';
+      }).join('');
+      if (missing.length) {
+        html += '<div class="grid-note">Không tìm thấy: ' + esc(missing.join(', ')) + '</div>';
+        html += '<div class="empty" style="text-align:left;padding:6px 2px 0">' +
+          'Bản đang mở có ' + state.warehouses.length + ' kho: ' +
+          esc(state.warehouses.map(function (x) { return x.name; }).join(', ')) + '.<br>' +
+          'Nếu những mã trên thuộc kho bạn đã tạo ở máy hoặc file khác, vào Cài đặt → Sao lưu → Nhập từ file .json để nạp dữ liệu vào bản này.' +
+          '</div>';
+      }
+      if (!filtered.length) {
+        $('grid').innerHTML = '<div class="empty"><b>Không mã nào khớp</b>Kiểm tra lại chính tả, các mã ngăn nhau bởi dấu phẩy hoặc dấu cách.</div>';
+        return;
+      }
+      $('grid').innerHTML = html;
+      return;
+    }
+
+    var q = terms.length ? terms[0].toUpperCase() : '';
+    w.codes.forEach(function (c) {
+      if (!q || c.toUpperCase().indexOf(q) >= 0) filtered.push({ code: c, whId: w.id, whName: w.name });
+    });
+    var others = [];
+    if (q) {
+      state.warehouses.forEach(function (x) {
+        if (x.id === w.id) return;
+        x.codes.forEach(function (c) {
+          if (c.toUpperCase().indexOf(q) >= 0 && others.length < 300) {
+            others.push({ code: c, whId: x.id, whName: x.name });
+          }
+        });
+      });
+    }
+    $('count').textContent = q ? (filtered.length + others.length) + ' kết quả' : w.codes.length + ' vị trí';
+
+    if (!w.codes.length && !others.length) {
+      $('grid').innerHTML = '<div class="empty"><b>Kho này chưa có vị trí nào</b>Mở Cài đặt → Kho &amp; vị trí để dán danh sách mã vào.</div>';
+      return;
+    }
+    if (!filtered.length && !others.length) {
+      $('grid').innerHTML = '<div class="empty"><b>Không tìm thấy “' + esc(q) + '” ở kho nào</b>Gõ ngắn hơn, hoặc dán nhiều mã ngăn nhau bởi dấu phẩy.</div>';
+      return;
+    }
+    html = filtered.map(function (o) {
+      return '<button class="loc" data-code="' + esc(o.code) + '">' + esc(o.code) + '</button>';
+    }).join('');
+    if (others.length) {
+      html += '<div class="grid-note">Tìm thấy ở kho khác</div>';
+      html += others.map(function (o) {
+        return '<button class="loc" data-code="' + esc(o.code) + '" data-wh="' + esc(o.whId) + '">' +
+          esc(o.code) + '<span class="whtag">' + esc(o.whName) + '</span></button>';
+      }).join('');
+      filtered = filtered.concat(others);   // Trước/Sau chạy hết cả danh sách đang hiện
+    }
+    $('grid').innerHTML = html;
+  }
+
+  /* ---------- label view ---------- */
+  var current = -1;
+  function indexOfItem(code, whId) {
+    for (var i = 0; i < filtered.length; i++) {
+      if (filtered[i].code === code && (!whId || filtered[i].whId === whId)) return i;
+    }
+    return -1;
+  }
+  function openLabel(code, whId) {
+    current = indexOfItem(code, whId);
+    var item = current >= 0 ? filtered[current] : null;
+    if (item && item.whId !== active().id) {
+      state.activeId = item.whId; save(); renderRail();
+      $('topSub').textContent = active().name + ' · ' + active().codes.length + ' vị trí';
+    }
+    $('sheetWh').textContent = item ? item.whName : active().name;
+    $('sheetCode').textContent = code;
+    $('sheetPayload').textContent = payloadOf(code);
+    fillSticker($('stickerBig'), code);
+    if ($('scanview').classList.contains('on')) openScan(code);
+    $('btnPrev').disabled = current <= 0;
+    $('btnNext').disabled = current < 0 || current >= filtered.length - 1;
+    $('sheet').classList.add('on');
+    $('btnClose').focus();
+  }
+  function closeLabel() { $('sheet').classList.remove('on'); }
+  function step(d) {
+    var i = current + d;
+    if (i >= 0 && i < filtered.length) openLabel(filtered[i].code, filtered[i].whId);
+  }
+
+  /* ---------- chế độ quét ---------- */
+  function openScan(code) {
+    $('scanCode').textContent = code;
+    $('scanview').classList.add('on');
+    sizeScan(code);
+  }
+  // vẽ đúng số điểm ảnh thật của màn hình: mỗi ô vuông là số nguyên pixel, không bị nhoè khi phóng
+  function sizeScan(code) {
+    code = code || $('scanCode').textContent;
+    var cap = Math.min(window.innerWidth * 0.88, window.innerHeight * 0.62);
+    var avail = state.modPx ? cap : Math.min(cap, Math.min(window.innerWidth, window.innerHeight) * 0.45);
+    var r = paint($('scanCanvas'), code, avail, true);
+    $('scanview').classList.toggle('inv', !!state.invert);
+    $('scanInfo').textContent = payloadOf(code) + '  ·  ' + r.size + '×' + r.size + ' ô  ·  mỗi ô ' + r.mod + ' px';
+  }
+  function nudgeMod(d) {
+    var t = QR.encode(payloadOf($('scanCode').textContent), state.ecc || 'M', listVer).size + 8;
+    var fit = Math.floor(Math.min(window.innerWidth * 0.88, window.innerHeight * 0.62) / t);
+    var auto = Math.floor(Math.min(window.innerWidth, window.innerHeight) * 0.45 / t);
+    var cur = state.modPx || auto;
+    if (d > 0 && cur >= fit) { state.modPx = 0; save(); sizeScan(); return toast('Đã to hết cỡ màn hình'); }
+    state.modPx = Math.max(3, cur + d);
+    save(); sizeScan();
+  }
+  function closeScan() { $('scanview').classList.remove('on'); }
+
+  /* ---------- thử 4 cỡ để tìm cỡ máy quét đọc được ---------- */
+  var SIZE_STEPS = [4, 6, 9, 13];
+  function openSizeTest() {
+    var code = $('scanCode').textContent;
+    $('sizeTitle').textContent = 'Thử cỡ mã · ' + code;
+    var host = $('sizeRows');
+    host.innerHTML = '';
+    SIZE_STEPS.forEach(function (mod, i) {
+      var row = document.createElement('div');
+      row.className = 'st-row';
+      var tag = document.createElement('div');
+      tag.className = 'tag';
+      tag.textContent = 'Cỡ ' + 'ABCD'.charAt(i);
+      var cv = document.createElement('canvas');
+      var meta = document.createElement('div');
+      meta.className = 'meta';
+      var btn = document.createElement('button');
+      btn.className = 'btn primary';
+      btn.textContent = 'Dùng cỡ này';
+      btn.addEventListener('click', function () {
+        state.modPx = mod; save();
+        $('sizetest').classList.remove('on');
+        sizeScan();
+        toast('Đã đặt cỡ ' + 'ABCD'.charAt(i) + ' cho mọi vị trí');
+      });
+      row.appendChild(tag); row.appendChild(cv); row.appendChild(meta); row.appendChild(btn);
+      host.appendChild(row);
+      var saved = state.modPx;
+      state.modPx = mod;
+      var r = paint(cv, code, 1e5, true);
+      state.modPx = saved;
+      meta.textContent = (r.size + 8) * mod + ' px trên màn hình · mỗi ô ' + mod + ' px';
+    });
+    $('sizetest').classList.add('on');
+    $('sizetest').scrollTop = 0;
+  }
+
+  /* ---------- print ---------- */
+  function printOne(code) {
+    $('printRoot').innerHTML = '<div class="p-one"><div class="sticker">' + stickerHTML(code) + '</div></div>';
+    window.print();
+  }
+  function plainCellHTML(code) {
+    var r, path;
+    try {
+      r = QR.encode(payloadOf(code), state.ecc || 'M', listVer);
+      path = QR.toSvgPath(r.modules, r.size);
+    } catch (e) { return ''; }
+    var vb = '-4 -4 ' + (r.size + 8) + ' ' + (r.size + 8);
+    return '<div class="p-qr"><svg viewBox="' + vb + '" shape-rendering="crispEdges">' +
+      '<rect x="-4" y="-4" width="' + (r.size + 8) + '" height="' + (r.size + 8) + '" fill="#fff"/>' +
+      '<path d="' + path + '" fill="#000"/></svg></div>' +
+      '<div class="p-code">' + esc(code) + '</div>';
+  }
+
+  function openPrintDlg() {
+    var w = active();
+    if (!w.codes.length) return toast('Kho này chưa có vị trí nào để in');
+    var tong = 0;
+    state.warehouses.forEach(function (x) { tong += x.codes.length; });
+    $('prInfo').textContent = w.name + ' có ' + w.codes.length + ' vị trí · đang hiển thị ' +
+      filtered.length + ' · tất cả các kho cộng lại ' + tong + '.';
+    $('printdlg').classList.add('on');
+  }
+
+  function runPrint() {
+    var style = $('prStyle').value;
+    var per = parseInt($('prPerPage').value, 10) || 4;
+    var scope = $('prScope').value, list;
+    if (scope === 'filtered' && filtered.length) list = filtered.map(function (o) { return o.code; });
+    else if (scope === 'every') {
+      list = [];
+      state.warehouses.forEach(function (w) { list = list.concat(w.codes); });
+    } else list = active().codes.slice();
+    if (!list.length) return toast('Không có vị trí nào để in');
+    $('printdlg').classList.remove('on');
+    toast('Đang dựng ' + list.length + ' tem…');
+    setTimeout(function () {
+      var cols = (per === 2) ? 1 : (per === 9 || per === 6 ? 3 : 2);
+      if (per === 2) cols = 1;
+      if (per === 6) cols = 2;      // 2 cột x 3 hàng cho vừa chiều cao
+      var blank = $('prBlank').checked;
+      var html = '', i, j, first = true;
+      for (i = 0; i < list.length; i += per) {
+        if (!first && blank) html += '<div class="p-page blank">&nbsp;</div>';   // mặt sau để trống
+        first = false;
+        html += '<div class="p-page c' + Math.max(2, cols) + '"' +
+          (cols === 1 ? ' style="grid-template-columns:1fr"' : '') + '>';
+        for (j = i; j < Math.min(i + per, list.length); j++) {
+          html += '<div class="p-cell ' + style + '">' +
+            (style === 'plain' ? plainCellHTML(list[j]) : '<div class="sticker">' + stickerHTML(list[j]) + '</div>') +
+            '</div>';
+        }
+        html += '</div>';
+      }
+      $('printRoot').innerHTML = html;
+      window.print();
+    }, 60);
+  }
+
+  /* ---------- toast ---------- */
+  var tt;
+  function toast(msg) {
+    var el = $('toast');
+    el.textContent = msg; el.classList.add('on');
+    clearTimeout(tt); tt = setTimeout(function () { el.classList.remove('on'); }, 2200);
+  }
+
+  /* ---------- settings ---------- */
+  function openModal() {
+    $('tpl').value = state.tpl;
+    $('ecc').value = state.ecc;
+    $('forceVer').value = String(state.forceVer || 0);
+    $('directScan').checked = state.directScan !== false;
+    refreshVersion();
+    refreshPreview();
+    refreshWhPick();
+    refreshSeedInfo();
+    refreshLock();
+    $('storeState').textContent = storageOk
+      ? 'Đang lưu tự động trên máy này. Lần mở sau sẽ giữ nguyên cài đặt và danh sách.'
+      : 'Trình duyệt đang chặn lưu trữ — thay đổi chỉ có hiệu lực tới khi tải lại trang. Xuất file .json để giữ lại.';
+    $('modal').classList.add('on');
+  }
+  function refreshPreview() {
+    var sample = (active().codes[0]) || 'HMD01';
+    $('tplPreview').innerHTML = stickerHTML(sample);
+    $('tplText').textContent = payloadOf(sample);
+    $('tplWarn').hidden = String(state.tpl).indexOf('{ma}') >= 0;
+    $('verInfo').textContent = 'Mọi vị trí trong ' + active().name + ' đang vẽ ở ma trận ' +
+      (listVer * 4 + 17) + '×' + (listVer * 4 + 17) + ' ô — cùng một cỡ nên máy quét đọc đều tay.';
+  }
+  function buildHtml(nextSeed, cb) {
+    var json = JSON.stringify(nextSeed).replace(/</g, '\\u003c');
+    fetch(location.href, { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (html) {
+      var re = /(<script id="seedData"[^>]*>)([\s\S]*?)(<\/script>)/;
+      if (!re.test(html)) throw new Error('no-seed');
+      cb(html.replace(re, function (m, a, mid, c) { return a + '\n' + json + '\n' + c; }), 'fetch');
+    }).catch(function () {
+      cb(htmlFromDom(json), 'dom');   // mở file trực tiếp trong máy thì dựng từ trang đang chạy
+    });
+  }
+  function htmlFromDom(json) {
+    try {
+      var root = document.documentElement.cloneNode(true);
+      var q = function (s) { return root.querySelector(s); };
+      ['#sheet', '#modal', '#ask', '#scanview', '#compare', '#sizetest', '#toast', '#banner'].forEach(function (s) {
+        var el = q(s); if (el) el.classList.remove('on');
+      });
+      ['#grid', '#whList', '#printRoot', '#stickerBig', '#sizeRows', '#toast', '#banner',
+       '#seedInfo', '#verInfo', '#tplText', '#scanInfo', '#whPick'].forEach(function (s) {
+        var el = q(s); if (el) el.innerHTML = '';
+      });
+      var img = q('#compareImg'); if (img) img.removeAttribute('src');
+      var cv = q('#scanCanvas');
+      if (cv) { cv.removeAttribute('width'); cv.removeAttribute('height'); cv.removeAttribute('style'); }
+      [['#sheetCode', '—'], ['#sheetPayload', '—'], ['#scanCode', '—'],
+       ['#topSub', 'Chọn kho, rồi chọn vị trí để hiện mã QR']].forEach(function (pair) {
+        var el = q(pair[0]); if (el) el.textContent = pair[1];
+      });
+      var sd = q('#seedData'); if (!sd) return null;
+      sd.textContent = '\n' + json + '\n';
+      return '<!DOCTYPE html>\n' + root.outerHTML;
+    } catch (e) { return null; }
+  }
+
+  function refreshLock() {
+    var el = $('lockState'); if (!el) return;
+    el.textContent = (state.lock && state.lock.on)
+      ? 'Đang khoá. Mỗi lần mở app, lần đầu vào Cài đặt phải nhập mã PIN. Nhập mã mới bên dưới nếu muốn đổi.'
+      : 'Chưa khoá — ai cũng vào được Cài đặt. Đặt mã PIN bên dưới để khoá lại.';
+    $('pinSet').textContent = (state.lock && state.lock.on) ? 'Đổi mã' : 'Bật khoá';
+  }
+  function refreshSeedInfo() {
+    var s = readSeed();
+    var el = $('seedInfo'); if (!el) return;
+    el.textContent = s
+      ? 'File web đang kèm phiên bản dữ liệu ' + s.version + ' với ' + s.warehouses.length +
+        ' kho. Máy này đang ở phiên bản ' + (state.seedVersion || 0) + '.'
+      : 'File này chưa có danh sách kèm sẵn.';
+  }
+  function refreshWhPick() {
+    $('whPick').innerHTML = state.warehouses.map(function (w) {
+      return '<option value="' + esc(w.id) + '"' + (w.id === active().id ? ' selected' : '') + '>' + esc(w.name) + '</option>';
+    }).join('');
+    $('locText').value = active().codes.join('\n');
+  }
+  // "HME{01-90}" -> HME01..HME90 ; "HME63.{1-3}" -> HME63.1..HME63.3 ; "HMEDD" -> giữ nguyên
+  function expandPattern(text) {
+    var out = [];
+    String(text || '').split(/[\s,;]+/).forEach(function (part) {
+      part = part.trim();
+      if (!part) return;
+      var m = part.match(/^(.*?)\{\s*(\d+)\s*-\s*(\d+)\s*\}(.*)$/);
+      if (!m) { out.push(part); return; }
+      var pre = m[1], from = parseInt(m[2], 10), to = parseInt(m[3], 10), suf = m[4];
+      var pad = m[2].length;
+      if (isNaN(from) || isNaN(to) || to < from || to - from > 2000) { out.push(part); return; }
+      for (var i = from; i <= to; i++) {
+        var n = String(i);
+        while (n.length < pad) n = '0' + n;
+        out.push(pre + n + suf);
+      }
+    });
+    return out;
+  }
+
+  function newId(name) {
+    return (name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'kho') + '-' + Date.now().toString(36).slice(-4);
+  }
+
+  /* ---------- events ---------- */
+  document.addEventListener('DOMContentLoaded', function () {
+    load();
+    applySeed(false);   // file mới đăng lên web sẽ tự cập nhật danh sách cho mọi máy
+    if (!storageOk) showBanner();
+    renderRail(); renderGrid();
+
+    $('whList').addEventListener('click', function (e) {
+      var b = e.target.closest('.wh'); if (!b) return;
+      state.activeId = b.dataset.id; save();
+      $('q').value = ''; renderRail(); renderGrid();
+    });
+    $('grid').addEventListener('click', function (e) {
+      var b = e.target.closest('.loc'); if (!b) return;
+      openLabel(b.dataset.code, b.dataset.wh || null);
+      if (state.directScan !== false) openScan(b.dataset.code);
+    });
+    $('q').addEventListener('input', renderGrid);
+    $('qClear').addEventListener('click', function () { $('q').value = ''; renderGrid(); $('q').focus(); });
+
+    $('btnClose').addEventListener('click', closeLabel);
+    $('sheet').addEventListener('click', function (e) { if (e.target === $('sheet')) closeLabel(); });
+    $('btnPrev').addEventListener('click', function () { step(-1); });
+    $('btnNext').addEventListener('click', function () { step(1); });
+    $('btnPrintOne').addEventListener('click', function () { printOne($('sheetCode').textContent); });
+    $('btnScan').addEventListener('click', function () { openScan($('sheetCode').textContent); });
+    $('scanExit').addEventListener('click', closeScan);
+    $('scanPrev').addEventListener('click', function () { step(-1); });
+    $('scanNext').addEventListener('click', function () { step(1); });
+    $('scanCanvas').addEventListener('click', closeScan);
+    $('scanBigger').addEventListener('click', function () { nudgeMod(2); });
+    $('scanSmaller').addEventListener('click', function () { nudgeMod(-2); });
+    $('scanInvert').addEventListener('click', function () {
+      state.invert = !state.invert; save(); sizeScan();
+      toast(state.invert ? 'Đang hiện âm bản — máy quét thường phải bật chế độ đọc mã đảo màu' : 'Đã trả về đen trên trắng');
+    });
+    $('scanSizes').addEventListener('click', openSizeTest);
+    $('sizeExit').addEventListener('click', function () { $('sizetest').classList.remove('on'); });
+    $('scanCompare').addEventListener('click', function () { $('compareFile').click(); });
+    $('compareFile').addEventListener('change', function (e) {
+      var f = e.target.files[0]; if (!f) return;
+      var fr = new FileReader();
+      fr.onload = function () {
+        $('compareImg').src = fr.result;
+        $('compare').classList.add('on');
+      };
+      fr.readAsDataURL(f);
+      e.target.value = '';
+    });
+    $('compareExit').addEventListener('click', function () { $('compare').classList.remove('on'); });
+    window.addEventListener('resize', function () {
+      if ($('scanview').classList.contains('on')) sizeScan();
+      else if ($('sheet').classList.contains('on')) fillSticker($('stickerBig'), $('sheetCode').textContent);
+    });
+
+    $('askOk').addEventListener('click', function () {
+      var inp = $('askInput');
+      var v = inp.hidden ? true : inp.value;
+      var cb = askCb; askClose(); if (cb) cb(v);
+    });
+    $('askCancel').addEventListener('click', askClose);
+    $('askInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('askOk').click(); });
+    $('ask').addEventListener('click', function (e) { if (e.target === $('ask')) askClose(); });
+    $('btnPrintAll').addEventListener('click', openPrintDlg);
+    $('printClose').addEventListener('click', function () { $('printdlg').classList.remove('on'); });
+    $('printdlg').addEventListener('click', function (e) { if (e.target === $('printdlg')) $('printdlg').classList.remove('on'); });
+    $('prGo').addEventListener('click', runPrint);
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        if ($('ask').classList.contains('on')) return askClose();
+        if ($('compare').classList.contains('on')) return $('compare').classList.remove('on');
+        if ($('sizetest').classList.contains('on')) return $('sizetest').classList.remove('on');
+        if ($('printdlg').classList.contains('on')) return $('printdlg').classList.remove('on');
+        if ($('scanview').classList.contains('on')) return closeScan();
+        closeLabel(); $('modal').classList.remove('on');
+      }
+      if ($('scanview').classList.contains('on')) {
+        if (e.key === 'ArrowRight') step(1);
+        if (e.key === 'ArrowLeft') step(-1);
+      }
+      if ($('sheet').classList.contains('on')) {
+        if (e.key === 'ArrowRight') step(1);
+        if (e.key === 'ArrowLeft') step(-1);
+      }
+    });
+
+    $('btnSettings').addEventListener('click', function () {
+      if (!locked()) return openModal();
+      ask('Nhập mã PIN quản trị', 'Chỉ người được cấp mã mới sửa được kho và cài đặt.', '', 'Mở khoá', function (v) {
+        if (pinHash(String(v || '').trim()) === state.lock.hash) { unlocked = true; openModal(); }
+        else toast('Mã PIN không đúng');
+      }, { password: true });
+    });
+    $('modalClose').addEventListener('click', function () { $('modal').classList.remove('on'); });
+    $('modal').addEventListener('click', function (e) { if (e.target === $('modal')) $('modal').classList.remove('on'); });
+    Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) {
+      t.addEventListener('click', function () {
+        Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (x) { x.setAttribute('aria-selected', x === t); });
+        Array.prototype.forEach.call(document.querySelectorAll('[data-panel]'), function (p) { p.hidden = p.dataset.panel !== t.dataset.tab; });
+      });
+    });
+
+    $('tpl').addEventListener('input', function () {
+      state.tpl = $('tpl').value; save(); refreshPreview();
+    });
+
+    $('genAdd').addEventListener('click', function () {
+      var list = expandPattern($('genPattern').value);
+      if (!list.length) return toast('Chưa có mẫu nào để tạo');
+      if (list.length > 2000) return toast('Mỗi lần tạo tối đa 2000 vị trí');
+      var cur = $('locText').value.replace(/\s+$/, '');
+      $('locText').value = (cur ? cur + '\n' : '') + list.join('\n');
+      toast('Đã chèn ' + list.length + ' vị trí — bấm Lưu danh sách');
+    });
+
+    $('whPick').addEventListener('change', function () {
+      state.activeId = $('whPick').value; save();
+      renderRail(); renderGrid(); refreshWhPick(); refreshPreview();
+    });
+    $('whAdd').addEventListener('click', function () {
+      ask('Thêm kho', 'Đặt tên cho kho mới.', 'Kho E', 'Thêm kho', function (name) {
+        name = String(name || '').trim();
+        if (!name) return;
+        var same = state.warehouses.filter(function (x) {
+          return x.name.trim().toLowerCase() === name.toLowerCase();
+        })[0];
+        if (same) {                     // trùng tên thì mở kho đã có, không tạo kho thứ hai
+          state.activeId = same.id; save();
+          renderRail(); renderGrid(); refreshWhPick();
+          return toast('Đã có ' + same.name + ' — đang mở kho đó để bạn thêm vị trí');
+        }
+        var w = { id: newId(name), name: name, codes: [] };
+        state.warehouses.push(w); state.activeId = w.id; save();
+        renderRail(); renderGrid(); refreshWhPick(); toast('Đã thêm ' + w.name + ' — tạo danh sách vị trí bên dưới');
+      });
+    });
+    $('whRename').addEventListener('click', function () {
+      var w = active();
+      ask('Đổi tên kho', '', w.name, 'Lưu tên', function (name) {
+        name = String(name || '').trim();
+        if (!name) return;
+        w.name = name; save(); renderRail(); renderGrid(); refreshWhPick();
+      });
+    });
+    $('whDelete').addEventListener('click', function () {
+      if (state.warehouses.length < 2) return toast('Phải còn ít nhất một kho');
+      var w = active();
+      ask('Xoá ' + w.name + '?', 'Mất luôn ' + w.codes.length + ' vị trí trong kho này.', null, 'Xoá kho', function () {
+        state.warehouses = state.warehouses.filter(function (x) { return x.id !== w.id; });
+        state.activeId = state.warehouses[0].id; save();
+        renderRail(); renderGrid(); refreshWhPick(); toast('Đã xoá ' + w.name);
+      });
+    });
+    $('locSave').addEventListener('click', function () {
+      var seen = {}, list = [];
+      $('locText').value.split(/[\r\n,;\t]+/).forEach(function (s) {
+        s = s.trim();
+        if (s && !seen[s.toUpperCase()]) { seen[s.toUpperCase()] = 1; list.push(s); }
+      });
+      active().codes = list; save();
+      renderRail(); renderGrid(); refreshWhPick(); refreshPreview();
+      toast('Đã lưu ' + list.length + ' vị trí');
+    });
+
+    $('pinSet').addEventListener('click', function () {
+      var a = String($('pinNew').value || '').trim(), c = String($('pinNew2').value || '').trim();
+      if (!/^[0-9]{4,8}$/.test(a)) return toast('Mã PIN phải là 4 đến 8 chữ số');
+      if (a !== c) return toast('Hai lần nhập chưa khớp');
+      state.lock = { on: true, hash: pinHash(a) };
+      unlocked = true; save();
+      $('pinNew').value = ''; $('pinNew2').value = '';
+      refreshLock();
+      toast('Đã bật khoá — nhớ tạo lại file và đăng lên web cho các máy khác');
+    });
+    $('pinOff').addEventListener('click', function () {
+      if (!state.lock || !state.lock.on) return toast('Đang không khoá');
+      ask('Bỏ khoá cài đặt?', 'Sau khi bỏ, ai cũng mở được Cài đặt trên máy này.', null, 'Bỏ khoá', function () {
+        state.lock = { on: false, hash: '' }; save(); refreshLock();
+        toast('Đã bỏ khoá — nhớ tạo lại file và đăng lên web');
+      });
+    });
+
+    $('btnBuildSite').addEventListener('click', function () {
+      var seed = readSeed();
+      var next = {
+        version: ((seed && seed.version) || 0) + 1,
+        warehouses: JSON.parse(JSON.stringify(state.warehouses)),
+        lock: { on: !!(state.lock && state.lock.on), hash: (state.lock && state.lock.hash) || '' }
+      };
+      buildHtml(next, function (html, how) {
+        if (!html) return toast('Không dựng được file — hãy dùng Xuất file .json thay thế');
+        var blob = new Blob([html], { type: 'text/html' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'index.html';
+        a.click();
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 1500);
+        state.seedVersion = next.version; save(); refreshSeedInfo();
+        toast('Đã tạo index.html kèm dữ liệu (phiên bản ' + next.version + ') — kéo file này lên Netlify');
+      });
+    });
+
+    $('btnReseed').addEventListener('click', function () {
+      ask('Nạp lại danh sách từ file?', 'Danh sách kho trên máy này sẽ bị thay bằng danh sách nằm trong file web. Cài đặt hiển thị giữ nguyên.', null, 'Nạp lại', function () {
+        if (applySeed(true)) {
+          renderRail(); renderGrid(); refreshWhPick(); refreshSeedInfo();
+          toast('Đã nạp lại danh sách từ file');
+        } else toast('File không có danh sách kèm sẵn');
+      });
+    });
+
+    $('btnExport').addEventListener('click', function () {
+      var blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'vi-tri-kho.json';
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    });
+    $('btnImport').addEventListener('click', function () { $('fileImport').click(); });
+    $('fileImport').addEventListener('change', function (e) {
+      var f = e.target.files[0]; if (!f) return;
+      var fr = new FileReader();
+      fr.onload = function () {
+        try {
+          var s = JSON.parse(fr.result);
+          if (!s.warehouses || !s.warehouses.length) throw 0;
+          state = s; save();
+          renderRail(); renderGrid(); openModal();
+          toast('Đã nhập dữ liệu');
+        } catch (err) { toast('File không đúng định dạng'); }
+      };
+      fr.readAsText(f);
+      e.target.value = '';
+    });
+    $('btnReset').addEventListener('click', function () {
+      ask('Trả về danh sách gốc?', 'Mọi kho và vị trí bạn đã thêm trên máy này sẽ mất.', null, 'Khôi phục', function () {
+        state = defaultState(); save();
+        renderRail(); renderGrid(); openModal(); toast('Đã khôi phục danh sách gốc');
+      });
+    });
+  });
+})();
+
+</script>
+</body>
+</html>
